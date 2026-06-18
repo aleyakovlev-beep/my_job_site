@@ -108,10 +108,17 @@ from fastapi.responses import RedirectResponse
 
 # Маршрут для выхода из аккаунта
 @app.get("/logout")
-async def logout(response: Response):
-    # Очищаем куку, которая отвечает за авторизацию (замените "access_token" на имя вашей куки)
+async def logout():
+    from fastapi import Response
+    from fastapi.responses import RedirectResponse
+    
+    # Создаем ответ с перенаправлением на главную страницу
+    response = RedirectResponse(url="/", status_code=303)
+    
+    # Удаляем куку авторизации. 
+    # ВНИМАНИЕ: Если ваша кука называется по-другому (например, "session" или "token"),
+    # замените "access_token" на ваше название.
     response.delete_cookie(key="access_token")
     
-    # Перенаправляем пользователя обратно на главную страницу
-    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    return response
 
