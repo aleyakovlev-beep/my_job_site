@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск работы</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; color: #333; }
+        .navbar { background-color: #212529; padding: 15px; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar a { color: white; text-decoration: none; font-size: 20px; font-weight: bold; }
+        .container { display: flex; max-width: 1200px; margin: 30px auto; padding: 0 20px; gap: 30px; }
+        .left-column { flex: 2; }
+        .right-column { flex: 1; }
+        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: relative; }
+        .card-title { color: #0d6efd; margin-top: 0; margin-bottom: 5px; font-size: 22px; }
+        .company { color: #6c757d; margin-bottom: 15px; font-weight: bold; font-size: 14px; }
+        .salary { color: #198754; font-weight: bold; font-size: 16px; margin-bottom: 10px; }
+        .badge { display: inline-block; padding: 5px 10px; border-radius: 4px; font-size: 12px; color: white; font-weight: bold; }
+        .bg-success { background-color: #198754; }
+        .bg-secondary { background-color: #6c757d; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: bold; }
+        .form-control { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        .btn { background-color: #0d6efd; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        .btn:hover { background-color: #0b5ed7; }
+        h2 { margin-top: 0; color: #212529; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div style="max-width: 1200px; margin: 0 auto; width: 100%; padding: 0 5px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+            <!-- Если пользователь вошел, сохраняем его сессию в ссылке "На главную" -->
+            <a href="{% if user_email %}/?user_email={{ user_email }}{% else %}/{% endif %}">💼 СтудРабота</a>
+            <div>
+                {% if user_email %}
+                    <span style="margin-right: 15px; color: #a0aec0; font-size: 14px;">Вы вошли как: <strong>{{ user_email }}</strong></span>
+                    <a href="/dashboard?user_email={{ user_email }}" style="font-size: 16px; color: white; text-decoration: none; background-color: #4a5568; padding: 5px 15px; border-radius: 4px; font-weight: bold;">В кабинет →</a>
+                {% else %}
+                    <a href="/login" style="font-size: 16px; margin-right: 20px; color: white; text-decoration: none;">Войти</a>
+                    <a href="/register" style="font-size: 16px; color: white; text-decoration: none; background-color: #0d6efd; padding: 5px 15px; border-radius: 4px; font-weight: bold;">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="left-column">
+            <h2>Свежие вакансии</h2>
+            {% for vacancy in vacancies %}
+            <div class="card">
+                <h3 class="card-title">{{ vacancy.title }}</h3>
+                <div class="company">{{ vacancy.company_name }}</div>
+                <div class="salary">💵 Зарплата: {{ vacancy.salary }} руб.</div>
+                <div>
+                    {% if vacancy.is_remote %}
+                        <span class="badge bg-success">Удаленная работа</span>
+                    {% else %}
+                        <span class="badge bg-secondary">В офисе</span>
+                    {% endif %}
+                </div>
+                <p style="color: #495057; margin-top: 15px; line-height: 1.5;">{{ vacancy.description }}</p>
+                
+                <!-- Форма отклика соискателя (тайком передает скрытый email) -->
+                <form action="/apply/{{ vacancy.id }}" method="post" style="margin-top: 15px;">
+                    {% if user_email %}
+                        <input type="hidden" name="user_email" value="{{ user_email }}">
+                        <button type="submit" style="background-color: #198754; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%;">
+                            ✅ Откликнуться на вакансию
+                        </button>
+                    {% else %}
+                        <div style="background-color: #edf2f7; text-align: center; padding: 10px; border-radius: 4px; font-size: 13px; color: #4a5568; font-weight: bold;">
+                            🔒 <a href="/login" style="color: #0d6efd; text-decoration: none;">Войдите в аккаунт</a>, чтобы откликнуться
+                        </div>
+                    {% endif %}
+                </form>
+
+                <!-- Форма удаления вакансии -->
+                <form action="/delete-vacancy/{{ vacancy.id }}" method="post" style="margin-top: 15px; text-align: right;">
+                    {% if user_email %}<input type="hidden" name="user_email" value="{{ user_email }}">{% endif %}
+                    <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                        🗑 Удалить вакансию
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="right-column">
+            <div class="card">
+                <h3 style="margin-top: 0; margin-bottom: 20px;">Добавить вакансию</h3>
+                <form action="/add-vacancy" method="post">
+                    {% if user_email %}<input type="hidden" name="user_email" value="{{ user_email }}">{% endif %}
+                    <div class="form-group">
+                        <label>Название должности</label>
+                        <input type="text" name="title" class="form-control" required placeholder="Например: Python разработчик">
+                    </div>
+                    <div class="form-group">
+                        <label>Компания</label>
+                        <input type="text" name="company_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Зарплата (руб)</label>
+                        <input type="number" name="salary" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Описание</label>
+                        <textarea name="description" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group" style="display: flex; gap: 10px; align-items: center; margin-top: 15px;">
+                        <input type="checkbox" name="is_remote" value="true" id="remoteCheck">
+                        <label for="remoteCheck" style="margin: 0;">Удаленная работа</label>
+                    </div>
+                    <button type="submit" class="btn">Опубликовать</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
