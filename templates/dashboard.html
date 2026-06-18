@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Личный кабинет</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }
+        .navbar { background-color: #212529; padding: 15px; color: white; }
+        .navbar a { color: white; text-decoration: none; font-size: 20px; font-weight: bold; }
+        .container { max-width: 800px; margin: 40px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .role-badge { display: inline-block; padding: 5px 10px; border-radius: 4px; color: white; font-weight: bold; margin-top: 10px; }
+        .bg-primary { background-color: #0d6efd; }
+        .bg-warning { background-color: #ffc107; color: #333; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div style="max-width: 1200px; margin: 0 auto; width: 100%; padding: 0 20px;">
+            <a href="/?user_email={{ user.email }}">← На главную</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Личный кабинет</h1>
+        <p>Приветствуем, <strong>{{ user.email }}</strong>!</p>
+        
+        <div>
+            Ваш статус на сайте: 
+            {% if user.role == 'applicant' %}
+                <span class="role-badge bg-primary">🎓 Соискатель</span>
+                              <div style="margin-top: 20px; background: #e2e8f0; padding: 15px; border-radius: 4px;">
+                    <h3 style="margin-top: 0;">🎯 Мои отклики на вакансии:</h3>
+                    {% if applications %}
+                        <ul style="padding-left: 20px; margin-bottom: 0;">
+                        {% for app in applications %}
+                            <li style="margin-bottom: 5px;">Вы откликнулись на вакансию с ID № <strong>{{ app.vacancy_id }}</strong></li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p style="margin-bottom: 0;">Вы пока не откликнулись ни на одну вакансию.</p>
+                    {% endif %}
+                </div>
+
+
+            {% else %}
+                <span class="role-badge bg-warning">🏢 Работодатель</span>
+                <div style="margin-top: 20px; background: #fef3c7; padding: 15px; border-radius: 4px;">
+                    <h3>Инструменты работодателя:</h3>
+                    <p>Вы можете публиковать новые вакансии с главной страницы и управлять ими.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
