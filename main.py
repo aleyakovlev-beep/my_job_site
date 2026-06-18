@@ -103,3 +103,15 @@ def apply_to_vacancy(vacancy_id: int, user_email: str = Form(...), db: Session =
     db.add(new_application)
     db.commit()
     return RedirectResponse(url=f"/dashboard?user_email={user_email}", status_code=303)
+    from fastapi import APIRouter, Response, status
+from fastapi.responses import RedirectResponse
+
+# Маршрут для выхода из аккаунта
+@app.get("/logout")
+async def logout(response: Response):
+    # Очищаем куку, которая отвечает за авторизацию (замените "access_token" на имя вашей куки)
+    response.delete_cookie(key="access_token")
+    
+    # Перенаправляем пользователя обратно на главную страницу
+    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+
